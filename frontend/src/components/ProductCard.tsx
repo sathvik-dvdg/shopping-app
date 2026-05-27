@@ -1,45 +1,44 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Product } from '../hooks/useProducts';
 
-interface ProductCardProps {
-  product: any;
-  onAddToCart: () => void;
+interface Props {
+  product: Product;
 }
 
-export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  // Force price to be a number, fallback to 0 if missing/corrupt
-  const safePrice = Number(product?.price) || 0;
-  // Fallback image if URI is missing
-  const safeImage = product?.image || 'https://via.placeholder.com/200';
+export default function ProductCard({ product }: Props) {
+  const router = useRouter();
 
   return (
-    <View style={styles.card}>
-      <Image source={{ uri: safeImage }} style={styles.image} resizeMode="cover" />
+    <TouchableOpacity 
+      style={styles.card} 
+      onPress={() => router.push({ pathname: '/product/[id]', params: { id: product._id } })}
+    >
+      <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={1}>{product?.name || 'Unknown Product'}</Text>
-        <Text style={styles.price}>${safePrice.toFixed(2)}</Text>
-        
-        <TouchableOpacity 
-          style={[styles.button, (!product?.isAvailable || product?.stock === 0) && styles.buttonDisabled]} 
-          onPress={onAddToCart}
-          disabled={!product?.isAvailable || product?.stock === 0}
-        >
-          <Text style={styles.buttonText}>
-            {product?.isAvailable && product?.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.name} numberOfLines={2}>{product.name}</Text>
+        <Text style={styles.price}>${product.price.toFixed(2)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: '#fff', borderRadius: 8, marginBottom: 15, overflow: 'hidden', elevation: 2 },
-  image: { width: '100%', height: 200 },
-  info: { padding: 15 },
-  title: { fontSize: 18, fontWeight: '600', marginBottom: 5 },
-  price: { fontSize: 16, color: '#666', marginBottom: 15 },
-  button: { backgroundColor: '#000', padding: 12, borderRadius: 6, alignItems: 'center' },
-  buttonDisabled: { backgroundColor: '#ccc' },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
+  card: { 
+    flex: 1, 
+    margin: 8, 
+    backgroundColor: '#fff', 
+    borderRadius: 8, 
+    overflow: 'hidden', 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.1, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
+  image: { width: '100%', height: 150 },
+  info: { padding: 12 },
+  name: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  price: { fontSize: 14, color: '#2ecc71', fontWeight: 'bold' }
 });

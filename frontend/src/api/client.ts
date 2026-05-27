@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // Replace with your machine's local IP address (e.g., http://192.168.1.5:3000)
 // Do not use localhost or 127.0.0.1 for React Native testing on physical devices/emulators.
-export const API_URL = 'http://10.77.102.68:3000'; 
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'; 
 
 export const apiClient = axios.create({
   baseURL: API_URL,
