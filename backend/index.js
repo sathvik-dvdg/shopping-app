@@ -1,6 +1,8 @@
+//index.js
 const express = require('express');
 const cors = require('cors');
-
+const connectDB = require("./db/db");
+require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -17,18 +19,14 @@ app.use(express.urlencoded({ extended: true }));
 // API routes
 app.use('/', routes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'Server running' });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Route not found'
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const start = async () => {
+  try {
+    await connectDB(process.env.MONGO_URI);
+    app.listen(PORT, () => {
+      console.log(`server is running on port ${PORT} `);
+    });
+  } catch (error) {
+    console.log("db is not connected");
+  }
+};
+start();
