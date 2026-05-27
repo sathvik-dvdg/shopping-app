@@ -1,4 +1,4 @@
-// db.js
+// db/db.js
 const mongoose = require("mongoose");
 
 const connectdb = (url) => {
