@@ -1,23 +1,22 @@
-// backend/routes/routes.js
 const express = require("express");
-const {
-  AllItems,
-  singleItem,
-  addItem,
-  updateItem,
-  deleteItem,
-} = require("../controllers/controller");
+const { AllItems, singleItem, addItem, updateItem, deleteItem } = require("../controllers/controller");
+const { registerUser, loginUser } = require("../controllers/authController");
+const { protect, admin } = require("../middleware/authMiddleware");
 
 const routes = express.Router();
 routes.use(express.json());
-routes.get("/", AllItems);
 
-routes.get("/:id", singleItem);
+// Auth routes
+routes.post("/register", registerUser);
+routes.post("/login", loginUser);
 
-routes.post("/", addItem);
+// Public product routes
+routes.get("/products", AllItems);
+routes.get("/products/:id", singleItem);
 
-routes.put("/:id", updateItem);
-
-routes.delete("/:id", deleteItem);
+// Protected admin routes (requires JWT and admin role)
+routes.post("/products", protect, admin, addItem);
+routes.put("/products/:id", protect, admin, updateItem);
+routes.delete("/products/:id", protect, admin, deleteItem);
 
 module.exports = routes;
