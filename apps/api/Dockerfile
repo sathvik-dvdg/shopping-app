@@ -16,9 +16,11 @@ WORKDIR /usr/src/app
 # Set Node environment to production
 ENV NODE_ENV=production
 
-# Copy dependencies and source code from builder
+# Copy dependencies and ALL required source code from builder
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/src ./src
+COPY --from=builder /usr/src/app/routes ./routes
+COPY --from=builder /usr/src/app/model ./model
 COPY --from=builder /usr/src/app/index.js ./
 COPY --from=builder /usr/src/app/package.json ./
 
