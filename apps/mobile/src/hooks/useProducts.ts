@@ -25,7 +25,7 @@ export const useProducts = () => {
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
-      const response = await apiClient.get('/products');
+      const response = await apiClient.get('/api/products');
       // The backend returns { success: true, count: X, data: [...] }
       setProducts(response.data.data);
       setError(null);

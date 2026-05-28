@@ -64,7 +64,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        
+        const isAuthRoute = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register');
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
           originalRequest._retry = true;
           try {
             const refreshToken = await AsyncStorage.getItem('auth_refresh_token');
@@ -84,14 +87,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           } catch (refreshError) {
             await logout();
-            return Promise.reject(refreshError);
+            return Promise.reject(error); 
           }
         }
         return Promise.reject(error);
       }
     );
   };
-
+  
   const login = async (email: string, password: string) => {
     const data = await ApiClient.login({ email, password });
     const { accessToken, refreshToken, ...userData } = data;

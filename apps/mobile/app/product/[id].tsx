@@ -17,7 +17,7 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await apiClient.get(`/products/${id}`);
+        const response = await apiClient.get(`/api/products/${id}`);
         setProduct(response.data.data);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to load product');

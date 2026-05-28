@@ -1,3 +1,4 @@
+// apps/api/src/app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -17,6 +18,9 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const { requestLogger } = require('./middleware/loggerMiddleware');
+app.use(requestLogger);
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }

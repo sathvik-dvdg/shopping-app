@@ -7,30 +7,33 @@ const generateTokens = (id) => {
     const refreshToken = jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
     return { accessToken, refreshToken };
 };
-
 const register = async (req, res, next) => {
     try {
+        console.log('[AUTH DEBUG] Register controller entered');
         const { name, email, password } = req.body;
         
-        // Input validation
         if (!name || !email || !password) {
+            console.log('[AUTH DEBUG] Validation failed: Missing fields');
             res.status(400);
             throw new Error('Please add all required fields');
         }
 
+        console.log(`[AUTH DEBUG] Checking if user exists: ${email}`);
         const userExists = await User.findOne({ email });
         if (userExists) {
+            console.log('[AUTH DEBUG] User already exists');
             res.status(400);
             throw new Error('User already exists');
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const user = await User.create({ name, email, password: hashedPassword });
+        console.log('[AUTH DEBUG] Creating user in DB (Model will handle hashing)');
+        // FIX: Pass raw password, let userModel.js handle the hashing
+        const user = await User.create({ name, email, password });
         
         if (user) {
+            console.log(`[AUTH DEBUG] User created successfully. ID: ${user._id}`);
             const tokens = generateTokens(user._id);
+            console.log('[AUTH DEBUG] Tokens generated, sending response');
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
@@ -38,25 +41,41 @@ const register = async (req, res, next) => {
                 ...tokens
             });
         } else {
+            console.log('[AUTH DEBUG] User creation failed silently in DB');
             res.status(400);
             throw new Error('Invalid user data');
         }
     } catch (error) {
+        console.error('[AUTH DEBUG] Register Error:', error.message);
         next(error);
     }
 };
 
 const login = async (req, res, next) => {
     try {
+        console.log('[AUTH DEBUG] Login controller entered');
         const { email, password } = req.body;
         
         if (!email || !password) {
+            console.log('[AUTH DEBUG] Validation failed: Missing credentials');
             res.status(400);
             throw new Error('Please provide email and password');
         }
 
+        console.log(`[AUTH DEBUG] Querying DB for user: ${email}`);
         const user = await User.findOne({ email });
-        if (user && (await bcrypt.compare(password, user.password))) {
+        
+        if (!user) {
+            console.log('[AUTH DEBUG] Login failed: User not found');
+            res.status(401);
+            throw new Error('Invalid credentials');
+        }
+
+        console.log('[AUTH DEBUG] User found. Comparing passwords...');
+        const isMatch = await bcrypt.compare(password, user.password);
+        
+        if (isMatch) {
+            console.log('[AUTH DEBUG] Password match confirmed. Generating tokens.');
             const tokens = generateTokens(user._id);
             res.json({
                 _id: user._id,
@@ -65,10 +84,12 @@ const login = async (req, res, next) => {
                 ...tokens
             });
         } else {
+            console.log('[AUTH DEBUG] Login failed: Password mismatch');
             res.status(401);
             throw new Error('Invalid credentials');
         }
     } catch (error) {
+        console.error('[AUTH DEBUG] Login Error:', error.message);
         next(error);
     }
 };
