@@ -44,6 +44,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "apiUrl": "http://127.0.0.1:5000",
+      "variant": "development",
+      "router": {},
+      "eas": {
+        "projectId": "447ab594-6e7a-4f51-bd4f-58e56e845d86"
+      }
     }
   }
 }

@@ -1,32 +1,19 @@
 {
-  "cli": {
-    "version": ">= 10.0.0"
-  },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "APP_VARIANT": "development"
-      }
-    },
-    "staging": {
-      "distribution": "internal",
-      "env": {
-        "APP_VARIANT": "staging"
-      },
+    "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://shopping-cart-api-sih1.onrender.com",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "production": {
-      "distribution": "store",
       "env": {
-        "APP_VARIANT": "production"
+        "EXPO_PUBLIC_API_URL": "https://shopping-cart-api-sih1.onrender.com",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
