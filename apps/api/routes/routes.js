@@ -1,14 +1,18 @@
+//apps\api\routes\routes.js
 const express = require("express");
-const { AllItems, singleItem, addItem, updateItem, deleteItem } = require("../controllers/controller");
-const { registerUser, loginUser } = require("../controllers/authController");
-const { protect, admin } = require("../middleware/authMiddleware");
+const { AllItems, singleItem, addItem, updateItem, deleteItem } = require("../src/controllers/controller");
+const { registerUser, loginUser, refresh, logout, me } = require("../src/controllers/authController");
+const { protect, admin } = require("../src/middleware/authMiddleware");
 
 const routes = express.Router();
 routes.use(express.json());
 
-// Auth routes
-routes.post("/register", registerUser);
-routes.post("/login", loginUser);
+// Auth routes (Aligned with frontend client.ts)
+routes.post("/auth/register", registerUser);
+routes.post("/auth/login", loginUser);
+routes.post("/auth/refresh", refresh);
+routes.post("/auth/logout", logout);
+routes.get("/auth/me", protect, me); // Protected route to get user profile
 
 // Public product routes
 routes.get("/products", AllItems);

@@ -29,7 +29,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Import Routes
-const routes = require('./routes/routes');
+// CORRECT
+const routes = require('../routes/routes');
 app.use('/api', routes);
 
 // Health Check Endpoint

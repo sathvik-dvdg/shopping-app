@@ -114,4 +114,10 @@ const me = async (req, res, next) => {
     }
 };
 
-module.exports = { register, login, refresh, logout, me };
+module.exports = { 
+    registerUser: register, 
+    loginUser: login, 
+    refresh, 
+    logout, 
+    me 
+};
