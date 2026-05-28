@@ -2,10 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const Sentry = require('@sentry/node');
+const initSentry = require('./config/sentry');
 const morgan = require('morgan');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
+
+// Initialize Sentry as early as possible
+initSentry(app);
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 
 // Security & Utility Middleware
 app.use(helmet());
@@ -29,6 +36,9 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString() 
     });
 });
+
+// Sentry error handler must be before your global error handler
+app.use(Sentry.Handlers.errorHandler());
 
 // Global Error Handler (must be the last middleware)
 app.use(errorHandler);
