@@ -7,9 +7,12 @@ const requestLogger = (req, res, next) => {
         console.log(`\n[${new Date().toISOString()}]`);
         console.log(`${req.method} ${req.originalUrl}`);
         console.log(`Status: ${res.statusCode}`);
+        
+        // Blind spot fixed: Safely fallback undefined route properties
         if (Object.keys(req.body || {}).length) console.log(`Body:`, JSON.stringify(req.body, null, 2));
-        if (Object.keys(req.params).length) console.log(`Params:`, req.params);
-        if (Object.keys(req.query).length) console.log(`Query:`, req.query);
+        if (Object.keys(req.params || {}).length) console.log(`Params:`, req.params);
+        if (Object.keys(req.query || {}).length) console.log(`Query:`, req.query);
+        
         console.log(`Execution Time: ${duration}ms`);
     });
     
