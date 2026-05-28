@@ -2,43 +2,45 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
 const Sentry = require('@sentry/node');
 const initSentry = require('./config/sentry');
-const morgan = require('morgan');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
 
-// Initialize Sentry as early as possible
-initSentry(app);
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
+// Initialize Sentry before requiring any other routes
+initSentry();
 
 // Security & Utility Middleware
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
-app.use(express.json({ limit: '10kb' })); // Body parser with size limit
-app.use(morgan('combined')); // Structured logging
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
-    message: { message: 'Too many requests from this IP, please try again later.' }
+    max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use('/api/', limiter);
+app.use(limiter);
+
+// Import Routes
+const routes = require('./routes/routes');
+app.use('/api', routes);
 
 // Health Check Endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'ok', 
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString() 
-    });
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Sentry error handler must be before your global error handler
-app.use(Sentry.Handlers.errorHandler());
+// Sentry error handler must be registered BEFORE your global error handler
+if (process.env.SENTRY_DSN) {
+    Sentry.setupExpressErrorHandler(app);
+}
 
 // Global Error Handler (must be the last middleware)
 app.use(errorHandler);

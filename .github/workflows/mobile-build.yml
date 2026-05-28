@@ -1,0 +1,35 @@
+name: Mobile EAS Build & OTA
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-build.yml'
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install Dependencies
+        working-directory: apps/mobile
+        run: npm ci
+      - name: Publish OTA Update
+        working-directory: apps/mobile
+        run: eas update --branch main --message "Automated update ${{ github.sha }}" --non-interactive
+      - name: Build Android Staging (APK)
+        working-directory: apps/mobile
+        run: eas build --platform android --profile staging --non-interactive
